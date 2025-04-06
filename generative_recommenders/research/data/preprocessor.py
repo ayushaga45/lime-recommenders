@@ -127,7 +127,10 @@ class MovielensDataProcessor(DataProcessor):
 
     def download(self) -> None:
         if not self.file_exists(self._saved_name):
-            urlretrieve(self._download_path, self._saved_name)
+            # urlretrieve(self._download_path, self._saved_name)
+            os.system(
+                f"wget $(fwdproxy-config wget) {self._download_path} -O {self._saved_name}"
+            )
         if self._saved_name[-4:] == ".zip":
             ZipFile(self._saved_name, "r").extractall(path="tmp/")
         else:
@@ -338,7 +341,10 @@ class AmazonDataProcessor(DataProcessor):
 
     def download(self) -> None:
         if not self.file_exists(self._saved_name):
-            urlretrieve(self._download_path, self._saved_name)
+            os.system(
+                f"wget $(fwdproxy-config wget) {self._download_path} -O {self._saved_name}"
+            )
+            # urlretrieve(self._download_path, self._saved_name)
 
     def preprocess_rating(self) -> int:
         self.download()
@@ -430,14 +436,10 @@ class AmazonDataProcessor(DataProcessor):
         return num_unique_items
 
 
-def get_common_preprocessors() -> (
-    Dict[
-        str,
-        Union[
-            AmazonDataProcessor, MovielensDataProcessor, MovielensSyntheticDataProcessor
-        ],
-    ]
-):
+def get_common_preprocessors() -> Dict[
+    str,
+    Union[AmazonDataProcessor, MovielensDataProcessor, MovielensSyntheticDataProcessor],
+]:
     ml_1m_dp = MovielensDataProcessor(  # pyre-ignore [45]
         "http://files.grouplens.org/datasets/movielens/ml-1m.zip",
         "tmp/movielens1m.zip",
